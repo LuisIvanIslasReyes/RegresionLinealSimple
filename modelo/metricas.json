@@ -1,0 +1,11 @@
+{
+    "mae": 6286.453830757749,
+    "mse": 49830096.85590839,
+    "rmse": 7059.04362190151,
+    "r2_score": 0.9024461774180497,
+    "coeficiente": 9423.815323030976,
+    "intercepto": 25321.583011776813,
+    "total_muestras": 30,
+    "muestras_entrenamiento": 24,
+    "muestras_prueba": 6
+}

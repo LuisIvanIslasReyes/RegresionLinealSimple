@@ -1,0 +1,26 @@
+# ==================================================
+# DEPENDENCIAS DE LA APLICACIÓN WEB
+# Regresión Lineal Simple - Predicción de Salarios
+# ==================================================
+
+# Framework Web
+Flask==3.0.0
+Werkzeug==3.0.1
+
+# Análisis de Datos y Machine Learning
+numpy==1.26.2
+pandas==2.1.4
+scikit-learn==1.3.2
+
+# Visualización
+matplotlib==3.8.2
+
+# Serialización de Modelos
+joblib==1.3.2
+
+# Servidor WSGI (Producción)
+gunicorn==21.2.0
+
+# Utilidades
+python-dateutil==2.8.2
+pytz==2023.3

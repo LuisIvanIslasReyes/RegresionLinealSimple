@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Modelo de Regresión Lineal Simple para predicción de salarios basado en años de experiencia">
+    <title>Modelo de Regresión Lineal - Predicción de Salarios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="header-title">
+                    <i class="fas fa-chart-line"></i>
+                    Modelo de Regresión Lineal Simple
+                </h1>
+                <p class="header-subtitle">Predicción de Salarios basada en Años de Experiencia</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            
+            {% if not modelo_disponible %}
+            <!-- Alerta si el modelo no está disponible -->
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle alert-icon"></i>
+                <div class="alert-content">
+                    <h3>Modelo no disponible</h3>
+                    <p>Por favor, entrena el modelo primero ejecutando: <code>python train_model.py</code></p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Grid de 2 columnas -->
+            <div class="grid-2">
+                
+                <!-- Sección Izquierda: Información del Modelo -->
+                <div class="section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-info-circle"></i>
+                                Información del Modelo
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">Tipo de Modelo</span>
+                                    <span class="info-value">Regresión Lineal Simple</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Variable Independiente</span>
+                                    <span class="info-value">Años de Experiencia</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Variable Dependiente</span>
+                                    <span class="info-value">Salario ($)</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Total de Muestras</span>
+                                    <span class="info-value">{{ metricas.total_muestras or 'N/A' }}</span>
+                                </div>
+                            </div>
+
+                            {% if metricas %}
+                            <div class="equation-box">
+                                <h3 class="equation-title">Ecuación del Modelo</h3>
+                                <div class="equation">
+                                    y = {{ "%.2f"|format(metricas.intercepto) }} + {{ "%.2f"|format(metricas.coeficiente) }} × x
+                                </div>
+                                <p class="equation-description">
+                                    Donde <strong>y</strong> es el salario predicho y <strong>x</strong> son los años de experiencia.
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Métricas de Evaluación -->
+                    {% if metricas %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-chart-bar"></i>
+                                Métricas de Evaluación
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="metrics-grid">
+                                <div class="metric-card metric-r2">
+                                    <div class="metric-icon"><i class="fas fa-bullseye"></i></div>
+                                    <div class="metric-label">R² Score</div>
+                                    <div class="metric-value">{{ "%.4f"|format(metricas.r2_score) }}</div>
+                                    <div class="metric-percentage">{{ "%.2f"|format(metricas.r2_score * 100) }}%</div>
+                                    <div class="metric-description">Coeficiente de Determinación</div>
+                                </div>
+
+                                <div class="metric-card metric-rmse">
+                                    <div class="metric-icon"><i class="fas fa-chart-area"></i></div>
+                                    <div class="metric-label">RMSE</div>
+                                    <div class="metric-value">${{ "{:,.2f}".format(metricas.rmse) }}</div>
+                                    <div class="metric-description">Raíz del Error Cuadrático Medio</div>
+                                </div>
+
+                                <div class="metric-card metric-mae">
+                                    <div class="metric-icon"><i class="fas fa-chart-line"></i></div>
+                                    <div class="metric-label">MAE</div>
+                                    <div class="metric-value">${{ "{:,.2f}".format(metricas.mae) }}</div>
+                                    <div class="metric-description">Error Absoluto Medio</div>
+                                </div>
+
+                                <div class="metric-card metric-mse">
+                                    <div class="metric-icon"><i class="fas fa-calculator"></i></div>
+                                    <div class="metric-label">MSE</div>
+                                    <div class="metric-value">${{ "{:,.2f}".format(metricas.mse) }}</div>
+                                    <div class="metric-description">Error Cuadrático Medio</div>
+                                </div>
+                            </div>
+
+                            <div class="info-box">
+                                <h4><i class="fas fa-book-open"></i> Interpretación del R² Score</h4>
+                                <p>
+                                    El modelo explica aproximadamente <strong>{{ "%.2f"|format(metricas.r2_score * 100) }}%</strong> 
+                                    de la variabilidad en los salarios basándose en los años de experiencia.
+                                    {% if metricas.r2_score >= 0.9 %}
+                                    Esto indica un <strong>excelente ajuste</strong> del modelo a los datos.
+                                    {% elif metricas.r2_score >= 0.7 %}
+                                    Esto indica un <strong>buen ajuste</strong> del modelo a los datos.
+                                    {% elif metricas.r2_score >= 0.5 %}
+                                    Esto indica un <strong>ajuste moderado</strong> del modelo a los datos.
+                                    {% else %}
+                                    Esto indica que el modelo podría mejorarse.
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Sección Derecha: Predictor y Visualización -->
+                <div class="section">
+                    <!-- Predictor Interactivo -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-calculator"></i>
+                                Predictor de Salario
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <p class="predictor-description">
+                                Ingresa los años de experiencia para predecir el salario esperado.
+                            </p>
+
+                            <form id="predictForm" class="predict-form">
+                                <div class="form-group">
+                                    <label for="yearsInput" class="form-label">
+                                        Años de Experiencia
+                                    </label>
+                                    <div class="input-with-slider">
+                                        <input 
+                                            type="number" 
+                                            id="yearsInput" 
+                                            name="yearsInput" 
+                                            class="form-input"
+                                            min="0" 
+                                            max="50" 
+                                            step="0.1" 
+                                            value="5"
+                                            required
+                                            {% if not modelo_disponible %}disabled{% endif %}
+                                        >
+                                        <input 
+                                            type="range" 
+                                            id="yearsSlider" 
+                                            class="form-slider"
+                                            min="0" 
+                                            max="50" 
+                                            step="0.1" 
+                                            value="5"
+                                            {% if not modelo_disponible %}disabled{% endif %}
+                                        >
+                                    </div>
+                                </div>
+
+                                <button 
+                                    type="submit" 
+                                    class="btn btn-primary btn-full"
+                                    {% if not modelo_disponible %}disabled{% endif %}
+                                >
+                                    <i class="fas fa-play-circle btn-icon"></i>
+                                    Predecir Salario
+                                </button>
+                            </form>
+
+                            <!-- Resultado de la Predicción -->
+                            <div id="predictionResult" class="prediction-result" style="display: none;">
+                                <div class="result-icon"><i class="fas fa-dollar-sign"></i></div>
+                                <h3 class="result-title">Resultado de la Predicción</h3>
+                                <div class="result-years">
+                                    <span class="result-label">Años de Experiencia:</span>
+                                    <span class="result-value" id="resultYears">-</span>
+                                </div>
+                                <div class="result-salary">
+                                    <span class="result-label">Salario Predicho:</span>
+                                    <span class="result-value-large" id="resultSalary">$0.00</span>
+                                </div>
+                            </div>
+
+                            <!-- Mensaje de Error -->
+                            <div id="errorMessage" class="alert alert-error" style="display: none;">
+                                <i class="fas fa-times-circle alert-icon"></i>
+                                <span id="errorText">Error al realizar la predicción</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visualización de Datos -->
+                    {% if modelo_disponible %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-chart-pie"></i>
+                                Visualización del Modelo
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <img 
+                                    src="{{ url_for('static', filename='modelo_grafica.png') }}" 
+                                    alt="Gráfica del Modelo de Regresión Lineal"
+                                    class="chart-image"
+                                >
+                            </div>
+                            <p class="chart-description">
+                                <strong>Gráfica:</strong> Los puntos azules representan los datos de entrenamiento y prueba, 
+                                mientras que la línea roja muestra la predicción del modelo de regresión lineal.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Gráfica Interactiva -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-chart-area"></i>
+                                Gráfica Interactiva
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="interactiveChart" width="400" height="300"></canvas>
+                            <p class="chart-description">
+                                <strong>Gráfica interactiva:</strong> Visualización dinámica de los datos y predicciones del modelo.
+                            </p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- Sección de Conjunto de Datos -->
+            {% if datos %}
+            <div class="card full-width">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-database"></i>
+                        Conjunto de Datos
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="data-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Total de Muestras</span>
+                            <span class="stat-value">{{ datos.X_all|length }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Muestras de Entrenamiento</span>
+                            <span class="stat-value">{{ datos.X_train|length }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Muestras de Prueba</span>
+                            <span class="stat-value">{{ datos.X_test|length }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-text">
+                © 2025 Proyecto de Extracción de Conocimiento - Regresión Lineal Simple
+            </p>
+            <p class="footer-subtext">
+                Universidad Tecnológica de Tijuana | Materia: Extracción de Conocimiento de Base de Datos
+            </p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
